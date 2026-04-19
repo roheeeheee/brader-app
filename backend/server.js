@@ -16,17 +16,17 @@ const app = express();
 connectDB();
 
 // ── MIDDLEWARE ──────────────────────────────────────────
-// Allow React (port 3000) to call this server
+
+// FIXED CORS: Allow the React Frontend (usually port 3000)
 app.use(cors({ 
-  origin: 'http://localhost:5000', 
+  origin: 'http://localhost:3000', 
   credentials: true 
 }));
 
 // Parse JSON request bodies
 app.use(express.json());
 
-// Serve uploaded files publicly
-// Images at: http://localhost:5000/uploads/filename.jpg
+// Serve static files from uploads folder
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ── ROUTES ──────────────────────────────────────────────
