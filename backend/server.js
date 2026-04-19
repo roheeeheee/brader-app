@@ -48,8 +48,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ── ROUTES ──────────────────────────────────────────────
 
-// Explicitly handle all OPTIONS requests before routes to ensure they don't 405
-app.options('*', cors(corsOptions));
+// Use a REGEX for options to avoid the PathError wildcard crash
+app.options(/^(.*)$/, cors(corsOptions));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
@@ -58,16 +58,16 @@ app.use('/api/admin', adminRoutes);
 
 // ── CATCH-ALL ───────────────────────────────────────────
 
-// This middleware only runs if NONE of the routes above matched.
-// We use a broader match that avoids the PathError in Node 22 while 
-// ensuring we don't return 405 for valid but slow-loading routes.
-app.use((req, res, next) => {
-  if (req.path.startsWith('/api')) {
+// This is the safest way to catch unmatched routes without using '*'
+// We place it at the end of the stack.
+app.use((req, res) => {
+  if (req.originalUrl.startsWith('/api')) {
     return res.status(404).json({ 
-      message: `API Route ${req.method} ${req.path} not found.` 
+      message: `API Route ${req.method} ${req.originalUrl} not found.` 
     });
   }
-  next();
+  // Optional: Handle non-API 404s or serve frontend
+  res.status(404).send('Not Found');
 });
 
 // ── START SERVER ────────────────────────────────────────
