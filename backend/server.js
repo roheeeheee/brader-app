@@ -57,7 +57,7 @@ app.use('/api/admin', adminRoutes);
 
 // CATCH-ALL FOR 405/404 DEBUGGING
 // If a request hits this, it means the route above didn't match
-app.use('/api/*', (req, res) => {
+app.use('/api/:path*', (req, res) => {
   res.status(405).json({ 
     message: `Method ${req.method} not allowed on ${req.originalUrl}. Check your route definitions.` 
   });
