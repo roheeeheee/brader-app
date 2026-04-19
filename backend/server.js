@@ -34,23 +34,22 @@ const corsOptions = {
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
-  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
+  optionsSuccessStatus: 200 
 };
 
 // 1. Apply CORS globally
 app.use(cors(corsOptions));
 
-// 2. Handle Pre-flight requests immediately for ALL routes
-// This MUST be defined before any other middleware or routes
-app.options(/(.*)/, cors(corsOptions));
-
-// 3. Body parsing
+// 2. Body parsing
 app.use(express.json());
 
-// 4. Static files
+// 3. Static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ── ROUTES ──────────────────────────────────────────────
+
+// Explicitly handle all OPTIONS requests before routes to ensure they don't 405
+app.options('*', cors(corsOptions));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
@@ -60,11 +59,15 @@ app.use('/api/admin', adminRoutes);
 // ── CATCH-ALL ───────────────────────────────────────────
 
 // This middleware only runs if NONE of the routes above matched.
-// We use app.use('/api', ...) to handle 404s for the API specifically.
-app.use('/api', (req, res) => {
-  res.status(404).json({ 
-    message: `Route ${req.method} ${req.originalUrl} not found on this server.` 
-  });
+// We use a broader match that avoids the PathError in Node 22 while 
+// ensuring we don't return 405 for valid but slow-loading routes.
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json({ 
+      message: `API Route ${req.method} ${req.path} not found.` 
+    });
+  }
+  next();
 });
 
 // ── START SERVER ────────────────────────────────────────
