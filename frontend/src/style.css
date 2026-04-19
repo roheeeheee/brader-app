@@ -1,0 +1,363 @@
+/* ========== GOOGLE FONT ========== */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+/* ========== RESET ========== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ========== BODY ========== */
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #0f172a, #020617);
+  color: #e5e7eb;
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden; /* Iwas horizontal scroll */
+  overflow-y: auto;
+}
+
+
+
+/* ========== NAVIGATION ========== */
+.horizontal-nav{
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:10px 40px;
+background:#020617;
+border-bottom:1px solid #1e293b;
+}
+
+#logo{
+width: 100px;
+  height: 70px;
+  margin-left: 24px;
+  object-fit: cover;
+}
+
+.horizontal-nav ul{
+display:flex;
+gap:25px;
+list-style:none;
+}
+
+.horizontal-nav a{
+text-decoration:none;
+color:#cbd5e1;
+font-weight:500;
+transition:.3s;
+}
+
+.horizontal-nav a:hover{
+color:#22c55e; /* cube green */
+}
+
+.horizontal-nav a.active{
+color:#3b82f6; /* cube blue */
+}
+
+#themeToggle {
+  font-size: 24px;
+  padding: 6px 12px;
+  border-radius: 100px;
+  border: 1px solid #ffffff;
+  background: #020617;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+#themeToggle:hover {
+  transform: scale(1.1);
+}
+
+/* ========== HEADERS ========== */
+h1, h2, h3 {
+  margin-bottom: 12px;
+}
+
+h2 {
+  color: #22c55e;
+}
+
+h3 {
+  color: #3b82f6;
+}
+
+/* ========== SECTIONS & CONTAINERS ========== */
+.section, .signup-form, .bg-gray {
+  background: #020617;
+  max-width: 900px;
+  margin: 30px auto;
+  padding: 35px;
+  border-radius: 16px;
+  border: 1px solid #1e293b;
+  transition: 0.3s;
+}
+
+.section:hover, .bg-gray:hover {
+  transform: translateY(-4px);
+}
+
+p {
+  text-align: justify;
+}
+
+/* ========== IMAGES ========== */
+img {
+  width: 100%;
+  max-width: 80%;
+  border-radius: 14px;
+  margin: 25px auto;
+  display: block;
+}
+
+/* ========== FLEXBOX ========== */
+.flex-container {
+  display: flex;
+  gap: 15px;
+  padding: 20px;
+}
+
+.flex-item {
+  flex: 1;
+  padding: 30px;
+  text-align: center;
+  border-radius: 8px;
+  
+}
+
+/* ========== FORM ========== */
+input, textarea, select {
+  width: 100%;
+  padding: 12px;
+  margin-top: 6px;
+  border-radius: 8px;
+  border: 1px solid #334155;
+  background: #020617;
+  color: white;
+}
+
+textarea {
+  min-height: 120px;
+}
+
+input[type="submit"] {
+  background: #3b82f6;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  margin-top: 15px;
+  transition: 0.3s;
+}
+
+input[type="submit"]:hover {
+  background: #2563eb;
+}
+
+.error {
+  color: #ef4444;
+  font-size: 13px;
+}
+
+/* ========== LINKS ========== */
+a {
+  color: #22c55e;
+}
+
+a:hover {
+  color: #eab308;
+}
+
+/* ========== FOOTER ========== */
+.footer {
+  text-align: center;
+  padding: 20px;
+  margin-top: 40px;
+  background: #020617;
+  border-top: 1px solid #1e293b;
+}
+
+/* ========== TABLES ========== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  background: #3b82f6;
+  padding: 12px;
+  color: white;
+}
+
+td {
+  padding: 12px;
+  background: #020617;
+  border-bottom: 1px solid #1e293b;
+  text-align: justify;
+}
+
+/* ========== QUIZ GAME ========== */
+.option {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 10px;
+  padding: 12px 15px;
+  margin: 10px 0;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.option:hover {
+  border-color: #3b82f6;
+  transform: translateX(5px);
+}
+
+.option.selected {
+  background: #1e3a8a;
+  border-color: #3b82f6;
+}
+
+button {
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+button:disabled {
+  background: #334155;
+  cursor: not-allowed;
+}
+
+/* ========== DARK/LIGHT MODE ========== */
+body.light {
+  background: linear-gradient(135deg, #f8fafc, #e5e7eb);
+  color: #1e293b;
+}
+
+body.light .horizontal-nav {
+  background: #ffffff;
+  border-bottom: 1px solid #cbd5e1;
+}
+
+body.light .horizontal-nav a {
+  color: #334155;
+}
+
+body.light .horizontal-nav a:hover {
+  color: #16a34a;
+}
+
+body.light .horizontal-nav a.active {
+  color: #2563eb;
+}
+
+body.light h2 {
+  color: #16a34a;
+}
+
+body.light h3 {
+  color: #2563eb;
+}
+
+body.light .section, body.light .signup-form, body.light .bg-gray {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+}
+
+body.light p {
+  color: #334155;
+}
+
+body.light input, body.light textarea, body.light select {
+  background: #f8fafc;
+  color: #020617;
+  border: 1px solid #cbd5e1;
+}
+
+body.light input[type="submit"] {
+  background: #2563eb;
+  color: white;
+}
+
+body.light input[type="submit"]:hover {
+  background: #1d4ed8;
+}
+
+body.light th {
+  background: #2563eb;
+  color: white;
+}
+
+body.light td {
+  background: #ffffff;
+  border-bottom: 1px solid #cbd5e1;
+  color: black;
+}
+
+body.light .footer {
+  background: #ffffff;
+  border-top: 1px solid #cbd5e1;
+}
+
+body.light .error {
+  color: #dc2626;
+}
+
+body.light #themeToggle {
+  background: #ffffff;
+  border: 1px solid #000000;
+  color: #1e293b;
+}
+
+.login-body {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg,#0f172a,#020617);
+  color: #e5e7eb;
+}
+
+.login-container {
+  background: #020617;
+  width: 350px;
+  padding: 30px;
+  border-radius: 15px;
+  border: 1px solid #1e293b;
+}
+
+.login-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  background: #2563eb;
+  color: white;
+  border: none;
+}
+
+.error {
+  color: #ff0000;  
+  font-size: 13px;
+  margin-top: 5px;
+  display: block;   
+  text-align: left;
+}
+
+button[type="submit"] {
+  background: #3b82f6;
+  color: white;
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+button[type="submit"]:hover {
+  background: #2563eb;
+}
