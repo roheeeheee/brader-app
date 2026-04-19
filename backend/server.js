@@ -17,23 +17,51 @@ connectDB();
 
 // ── MIDDLEWARE ──────────────────────────────────────────
 
-// FIXED CORS: Allow the React Frontend (usually port 3000)
+// IMPROVED CORS: Ensure it handles pre-flight requests correctly
+const allowedOrigins = [
+  'http://localhost:3000', 
+  'http://127.0.0.1:3000', 
+  'http://localhost:3001',
+  'https://brader-app.vercel.app' // Added your production URL
+];
+
 app.use(cors({ 
-  origin: 'http://localhost:3000', 
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      return callback(new Error('CORS blocked this origin.'), false);
+    }
+    return callback(null, true);
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true 
 }));
 
 // Parse JSON request bodies
 app.use(express.json());
 
-// Serve static files from uploads folder
+// Serve static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ── ROUTES ──────────────────────────────────────────────
+
+// Health Check
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', message: 'Backend is running' });
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/admin', adminRoutes);
+
+// CATCH-ALL FOR 405/404 DEBUGGING
+// If a request hits this, it means the route above didn't match
+app.use('/api/*', (req, res) => {
+  res.status(405).json({ 
+    message: `Method ${req.method} not allowed on ${req.originalUrl}. Check your route definitions.` 
+  });
+});
 
 // ── START SERVER ────────────────────────────────────────
 const PORT = process.env.PORT || 5000;
