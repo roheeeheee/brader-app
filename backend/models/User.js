@@ -11,11 +11,18 @@ const userSchema = new mongoose.Schema({
   profilePic: { type: String, default: '' },
 }, { timestamps: true });
 
-// Hash password before saving
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 12);
-  next();
+// MODERN ASYNC PRE-SAVE HOOK
+// We remove 'next' to avoid the "next is not a function" error.
+// Mongoose resolves the hook when the async function finishes.
+userSchema.pre('save', async function () {
+  if (!this.isModified('password')) return;
+
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+  } catch (error) {
+    throw error; // Re-throw error to be caught by Mongoose
+  }
 });
 
 // Compare password method
