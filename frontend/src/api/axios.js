@@ -1,11 +1,11 @@
 import axios from 'axios';
 
-const instance = axios.create({
-  baseURL: 'http://localhost:5000/api',
+const API = axios.create({
+  baseURL: 'https://brader-app.vercel.app/api',
 });
 
-// Add token to every request automatically
-instance.interceptors.request.use((config) => {
+// Automatically attach the token to every request if it exists
+API.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -13,4 +13,4 @@ instance.interceptors.request.use((config) => {
   return config;
 });
 
-export default instance;
+export default API;

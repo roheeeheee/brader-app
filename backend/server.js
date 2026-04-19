@@ -18,7 +18,7 @@ connectDB();
 // ── MIDDLEWARE ──────────────────────────────────────────
 // Allow React (port 3000) to call this server
 app.use(cors({ 
-  origin: 'http://localhost:3000', 
+  origin: 'http://localhost:5000', 
   credentials: true 
 }));
 
