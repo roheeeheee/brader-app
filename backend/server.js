@@ -36,6 +36,9 @@ app.use(cors({
   credentials: true 
 }));
 
+// Handle Pre-flight OPTIONS requests explicitly to prevent 405s
+app.options('*', cors());
+
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -46,11 +49,12 @@ app.use('/api/posts', postRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/admin', adminRoutes);
 
-// FIXED CATCH-ALL: Using a regex-safe pattern to avoid PathError
-// This specifically targets any /api route that wasn't caught by the routers above
-app.use('/api', (req, res) => {
-  res.status(405).json({ 
-    message: `Method ${req.method} not allowed on ${req.originalUrl}.` 
+// FIXED CATCH-ALL: Use a more specific matching strategy
+// This middleware will only run if NONE of the routes above matched.
+app.use('/api', (req, res, next) => {
+  // If we reached here, no route was found
+  res.status(404).json({ 
+    message: `Route ${req.method} ${req.originalUrl} not found.` 
   });
 });
 
