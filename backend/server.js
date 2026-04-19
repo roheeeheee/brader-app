@@ -46,8 +46,9 @@ app.use('/api/posts', postRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/admin', adminRoutes);
 
-// FIXED CATCH-ALL: Use a simple string to avoid path-to-regexp errors
-app.all('/api/*', (req, res) => {
+// FIXED CATCH-ALL: Using a regex-safe pattern to avoid PathError
+// This specifically targets any /api route that wasn't caught by the routers above
+app.use('/api', (req, res) => {
   res.status(405).json({ 
     message: `Method ${req.method} not allowed on ${req.originalUrl}.` 
   });
