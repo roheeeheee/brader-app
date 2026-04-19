@@ -23,7 +23,7 @@ const allowedOrigins = [
   'https://brader-app.vercel.app'
 ];
 
-app.use(cors({ 
+const corsOptions = { 
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
@@ -33,19 +33,21 @@ app.use(cors({
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true 
-}));
+  credentials: true,
+  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
+};
 
-// Handle Pre-flight requests for ALL routes specifically to avoid 405s
-app.options(/(.*)/, (req, res) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin);
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.sendStatus(200);
-});
+// 1. Apply CORS globally
+app.use(cors(corsOptions));
 
+// 2. Handle Pre-flight requests immediately for ALL routes
+// This MUST be defined before any other middleware or routes
+app.options(/(.*)/, cors(corsOptions));
+
+// 3. Body parsing
 app.use(express.json());
+
+// 4. Static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ── ROUTES ──────────────────────────────────────────────
@@ -55,10 +57,11 @@ app.use('/api/posts', postRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/admin', adminRoutes);
 
-// FIXED CATCH-ALL: This must come LAST. 
-// We use a middleware function instead of a path string to be 100% safe 
-// from path-to-regexp errors while catching only unmatched /api requests.
-app.use('/api', (req, res, next) => {
+// ── CATCH-ALL ───────────────────────────────────────────
+
+// This middleware only runs if NONE of the routes above matched.
+// We use app.use('/api', ...) to handle 404s for the API specifically.
+app.use('/api', (req, res) => {
   res.status(404).json({ 
     message: `Route ${req.method} ${req.originalUrl} not found on this server.` 
   });
