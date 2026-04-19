@@ -36,8 +36,14 @@ app.use(cors({
   credentials: true 
 }));
 
-// FIXED: Using a regex literal instead of a string with '*' to avoid PathError
-app.options(/(.*)/, cors());
+// Handle Pre-flight requests for ALL routes specifically to avoid 405s
+app.options(/(.*)/, (req, res) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin);
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.sendStatus(200);
+});
 
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -49,11 +55,12 @@ app.use('/api/posts', postRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/admin', adminRoutes);
 
-// FIXED CATCH-ALL: Using a simple path prefix match. 
-// This avoids the '*' syntax that crashes modern path-to-regexp.
-app.use('/api', (req, res) => {
+// FIXED CATCH-ALL: This must come LAST. 
+// We use a middleware function instead of a path string to be 100% safe 
+// from path-to-regexp errors while catching only unmatched /api requests.
+app.use('/api', (req, res, next) => {
   res.status(404).json({ 
-    message: `Route ${req.method} ${req.originalUrl} not found.` 
+    message: `Route ${req.method} ${req.originalUrl} not found on this server.` 
   });
 });
 
