@@ -16,7 +16,6 @@ const app = express();
 connectDB();
 
 // ── MIDDLEWARE ──────────────────────────────────────────
-
 const allowedOrigins = [
   'http://localhost:3000', 
   'http://127.0.0.1:3000', 
@@ -37,44 +36,42 @@ const corsOptions = {
   optionsSuccessStatus: 200 
 };
 
-// Apply CORS globally
 app.use(cors(corsOptions));
-
-// EXPRESS 5 FIX: Handle Pre-flight requests using a REGEX literal `/(.*)/`
-// This prevents the "Missing parameter name at index 1: *" crash in Express 5.
 app.options(/(.*)/, cors(corsOptions));
-
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ── ROUTES ──────────────────────────────────────────────
-
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/admin', adminRoutes);
 
-// ── ERROR HANDLING / CATCH-ALL ──────────────────────────
-
-// EXPRESS 5 FIX: We check for '/api' manually using a function.
-// Never use `app.use('*', ...)` or `app.all('/api/*', ...)` in Express 5!
+// ── CATCH-ALL ───────────────────────────────────────────
 app.use((req, res, next) => {
   if (req.originalUrl.startsWith('/api')) {
     return res.status(404).json({ 
-      message: `API Endpoint ${req.method} ${req.originalUrl} not found. Check your route paths.` 
+      message: `API Endpoint ${req.method} ${req.originalUrl} not found.` 
     });
   }
   next();
 });
 
-// Generic Error Handler (Catches any server crashes gracefully)
+// Generic Error Handler
 app.use((err, req, res, next) => {
   console.error('Server Error:', err);
   res.status(500).json({ message: 'Internal Server Error', error: err.message });
 });
 
-// ── START SERVER ────────────────────────────────────────
+// ── START SERVER / EXPORT FOR VERCEL ────────────────────
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
-});
+
+// Only listen locally. Vercel handles the port dynamically in production.
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`✅ Server running on port ${PORT}`);
+  });
+}
+
+// 🚨 THIS IS CRITICAL FOR VERCEL SERVERLESS FUNCTIONS 🚨
+module.exports = app;
