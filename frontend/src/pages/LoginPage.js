@@ -42,13 +42,13 @@ const LoginPage = () => {
             <label htmlFor="email">Email Address</label>
             <input
               id="email"
-              name="email" // Added name attribute for browser autofill
+              name="email" 
               type="email"
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              autoComplete="username" // Helps password managers
+              autoComplete="username" 
             />
           </div>
 
@@ -56,11 +56,11 @@ const LoginPage = () => {
             <label htmlFor="password">Password</label>
             <input
               id="password"
-              name="password" // Added name attribute
+              name="password" 
               type="password"
               placeholder="Enter your password"
               value={password}
-              onChange={(e) => setEmail(e.target.value)} // FIXED TYPO: Was calling setEmail instead of setPassword
+              onChange={(e) => setPassword(e.target.value)} 
               required
               autoComplete="current-password"
             />

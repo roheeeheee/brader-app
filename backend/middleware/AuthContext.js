@@ -1,7 +1,8 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import API from '../api/axios';
 
-const AuthContext = createContext();
+// Added 'export' here so LoginPage.js can import { AuthContext }
+export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -33,28 +34,40 @@ export const AuthProvider = ({ children }) => {
 
   // Login function
   const login = async (email, password) => {
-    const { data } = await API.post('/auth/login', { email, password });
-    
-    // 1. Store token
-    localStorage.setItem('token', data.token);
-    
-    // 2. Set Axios header for subsequent requests
-    API.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
-    
-    // 3. Update state
-    setUser(data.user);
-    
-    // IMPORTANT: Return user for the LoginPage redirect logic
-    return data.user;
+    try {
+      const { data } = await API.post('/auth/login', { email, password });
+      
+      // 1. Store token
+      localStorage.setItem('token', data.token);
+      
+      // 2. Set Axios header for subsequent requests
+      API.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
+      
+      // 3. Update state
+      setUser(data.user);
+      
+      // IMPORTANT: Return user for the LoginPage redirect logic
+      return data.user;
+    } catch (err) {
+      // Clear any partial state on failure
+      localStorage.removeItem('token');
+      delete API.defaults.headers.common['Authorization'];
+      setUser(null);
+      throw err; // Re-throw so LoginPage.js can catch and display the error
+    }
   };
 
   // Register function
   const register = async (userData) => {
-    const { data } = await API.post('/auth/register', userData);
-    localStorage.setItem('token', data.token);
-    API.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
-    setUser(data.user);
-    return data.user;
+    try {
+      const { data } = await API.post('/auth/register', userData);
+      localStorage.setItem('token', data.token);
+      API.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
+      setUser(data.user);
+      return data.user;
+    } catch (err) {
+      throw err;
+    }
   };
 
   // Logout function
