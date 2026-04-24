@@ -63,15 +63,14 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Internal Server Error', error: err.message });
 });
 
-// ── START SERVER / EXPORT FOR VERCEL ────────────────────
+// ── START SERVER / RENDER FIX ───────────────────────────
+// Render injects its own PORT environment variable. We must use it.
 const PORT = process.env.PORT || 5000;
 
-// Only listen locally. Vercel handles the port dynamically in production.
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, () => {
-    console.log(`✅ Server running on port ${PORT}`);
-  });
-}
+// Removed the NODE_ENV check so that Render can successfully bind to the port.
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
+});
 
-// 🚨 THIS IS CRITICAL FOR VERCEL SERVERLESS FUNCTIONS 🚨
+// Keep this export just in case you ever switch back to Vercel for the backend.
 module.exports = app;
