@@ -11,17 +11,32 @@ const generateToken = (id) =>
 
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
-  const { name, email, password } = req.body;
   try {
-    const exists = await User.findOne({ email });
-    if (exists) return res.status(400).json({ message: 'Email already registered' });
-    
-    const user = await User.create({ name, email, password });
+    // 1. Extract username here
+    const { name, username, email, password } = req.body; 
+
+    const userExists = await User.findOne({ email });
+    if (userExists) return res.status(400).json({ message: 'User already exists' });
+
+    // 2. Check if username is already taken
+    const usernameExists = await User.findOne({ username });
+    if (usernameExists) return res.status(400).json({ message: 'Username is already taken' });
+
+    // 3. Save the new user with the username included
+    const user = await User.create({
+      name,
+      username,
+      email,
+      password
+    });
+
+    // FIX: Added the missing response to send the token and user data back!
     res.status(201).json({
       token: generateToken(user._id),
-      user: { _id: user._id, name: user.name, email: user.email, role: user.role }
+      user: { _id: user._id, name: user.name, username: user.username, email: user.email, role: user.role }
     });
   } catch (err) {
+    // FIX: Added the missing catch block
     res.status(500).json({ message: err.message });
   }
 });
@@ -37,12 +52,13 @@ router.post('/login', async (req, res) => {
       return res.status(403).json({ message: 'Your account is deactivated' });
     }
     
-    const match = await user.matchPassword(password);
+    // FIX: Changed from matchPassword to comparePassword to match User.js model
+    const match = await user.comparePassword(password);
     if (!match) return res.status(400).json({ message: 'Invalid email or password' });
     
     res.json({
       token: generateToken(user._id),
-      user: { _id: user._id, name: user.name, email: user.email, role: user.role }
+      user: { _id: user._id, name: user.name, username: user.username, email: user.email, role: user.role }
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -76,7 +92,9 @@ router.put('/change-password', protect, async (req, res) => {
   const { currentPassword, newPassword } = req.body;
   try {
     const user = await User.findById(req.user._id);
-    const match = await user.matchPassword(currentPassword);
+    
+    // FIX: Changed from matchPassword to comparePassword to match User.js model
+    const match = await user.comparePassword(currentPassword);
     if (!match) return res.status(400).json({ message: 'Current password is incorrect' });
     
     user.password = newPassword;

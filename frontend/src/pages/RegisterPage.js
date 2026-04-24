@@ -4,6 +4,7 @@ import { AuthContext } from '../context/AuthContext';
 
 const RegisterPage = () => {
   const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -18,7 +19,8 @@ const RegisterPage = () => {
     setLoading(true);
 
     try {
-      await register({ name, email: email.trim(), password });
+      // Include the new username in the registration payload
+      await register({ name, username: username.trim(), email: email.trim(), password });
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed.');
@@ -49,6 +51,20 @@ const RegisterPage = () => {
           </div>
 
           <div className="form-group">
+            <label htmlFor="username">Username</label>
+            <input
+              id="username"
+              name="username"
+              type="text"
+              placeholder="Choose a username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              autoComplete="username"
+            />
+          </div>
+
+          <div className="form-group">
             <label htmlFor="email">Email Address</label>
             <input
               id="email"
@@ -58,7 +74,7 @@ const RegisterPage = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              autoComplete="username"
+              autoComplete="email"
             />
           </div>
 
