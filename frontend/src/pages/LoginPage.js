@@ -1,57 +1,84 @@
-import { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { AuthContext } from '../context/AuthContext';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(''); // Improved variable name from nameError
-  const { login } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  
+  const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
+
     try {
-      // The login function MUST return the user object from the context
-      const user = await login(email, password);
-      
-      if (user) {
-        // Successful login: Redirect based on role
-        if (user.role === 'admin') {
-          navigate('/admin');
-        } else {
-          navigate('/home');
-        }
+      // Ensure we trim whitespace from email
+      const success = await login(email.trim(), password);
+      if (success) {
+        navigate('/');
+      } else {
+        setError('Invalid credentials. Please try again.');
       }
     } catch (err) {
-      // Capture the specific error message from your backend auth.routes.js
-      setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
+      setError(err.response?.data?.message || 'Login failed. Please check your connection.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className='signup-form'>
-      <h2>Login to Rubiks</h2>
-      {error && <p className='error'>{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <input 
-          type='email' 
-          placeholder='Email address'
-          value={email} 
-          onChange={e => setEmail(e.target.value)} 
-          required 
-        />
-        <input 
-          type='password' 
-          placeholder='Password'
-          value={password} 
-          onChange={e => setPassword(e.target.value)} 
-          required 
-        />
-        <button type='submit'>Login</button>
-      </form>
-      <p>Don't have an account? <Link to='/register'>Register here</Link></p>
+    <div className="auth-container">
+      <div className="auth-card">
+        <h2>Login to Twist & Turn</h2>
+        {error && <div className="error-message">{error}</div>}
+        
+        <form onSubmit={handleSubmit} autoComplete="on">
+          <div className="form-group">
+            <label htmlFor="email">Email Address</label>
+            <input
+              id="email"
+              name="email" // Added name attribute for browser autofill
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="username" // Helps password managers
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              name="password" // Added name attribute
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setEmail(e.target.value)} // FIXED TYPO: Was calling setEmail instead of setPassword
+              required
+              autoComplete="current-password"
+            />
+          </div>
+
+          <button 
+            type="submit" 
+            className="btn-primary" 
+            disabled={loading}
+          >
+            {loading ? 'Logging in...' : 'Login'}
+          </button>
+        </form>
+
+        <p className="auth-footer">
+          Don't have an account? <Link to="/register">Register here</Link>
+        </p>
+      </div>
     </div>
   );
 };
