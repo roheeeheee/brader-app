@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'https://brader-app.vercel.app/api',
+  baseURL: 'https://brader-app.onrender.com/api',
 });
 
 // Automatically attach the token to every request if it exists
