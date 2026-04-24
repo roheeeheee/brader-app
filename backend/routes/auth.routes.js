@@ -6,26 +6,29 @@ const upload = require('../middleware/upload');
 
 const router = express.Router();
 
-const generateToken = (id) => 
-  jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+// Include role in the JWT token payload for stronger backend middleware checks
+const generateToken = (id, role) => 
+  jwt.sign({ id, role }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password } = req.body; 
+    // Extract role from the request body
+    const { name, email, password, role } = req.body; 
 
     const userExists = await User.findOne({ email });
     if (userExists) return res.status(400).json({ message: 'User already exists' });
 
-    // Save the new user
+    // Save the new user with their role (defaults to 'user' if not specified)
     const user = await User.create({
       name,
       email,
-      password
+      password,
+      role: role || 'user'
     });
 
     res.status(201).json({
-      token: generateToken(user._id),
+      token: generateToken(user._id, user.role),
       user: { _id: user._id, name: user.name, email: user.email, role: user.role }
     });
   } catch (err) {
@@ -48,7 +51,7 @@ router.post('/login', async (req, res) => {
     if (!match) return res.status(400).json({ message: 'Invalid email or password' });
     
     res.json({
-      token: generateToken(user._id),
+      token: generateToken(user._id, user.role),
       user: { _id: user._id, name: user.name, email: user.email, role: user.role }
     });
   } catch (err) {
