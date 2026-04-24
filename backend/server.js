@@ -37,17 +37,18 @@ const corsOptions = {
   optionsSuccessStatus: 200 
 };
 
+// Apply CORS globally
 app.use(cors(corsOptions));
 
-// Handle Pre-flight requests using a REGEX to bypass Path-to-Regexp errors in Node 22
-app.options(/^(.*)$/, cors(corsOptions));
+// EXPRESS 5 FIX: Handle Pre-flight requests using a REGEX literal `/(.*)/`
+// This prevents the "Missing parameter name at index 1: *" crash in Express 5.
+app.options(/(.*)/, cors(corsOptions));
 
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ── ROUTES ──────────────────────────────────────────────
 
-// Note: These MUST come before any broad middleware
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/comments', commentRoutes);
@@ -55,15 +56,21 @@ app.use('/api/admin', adminRoutes);
 
 // ── ERROR HANDLING / CATCH-ALL ──────────────────────────
 
-// This function only runs if no route above matched.
-// We check for /api prefix manually to avoid the '*' string crash.
+// EXPRESS 5 FIX: We check for '/api' manually using a function.
+// Never use `app.use('*', ...)` or `app.all('/api/*', ...)` in Express 5!
 app.use((req, res, next) => {
   if (req.originalUrl.startsWith('/api')) {
     return res.status(404).json({ 
-      message: `API Endpoint ${req.method} ${req.originalUrl} not found.` 
+      message: `API Endpoint ${req.method} ${req.originalUrl} not found. Check your route paths.` 
     });
   }
   next();
+});
+
+// Generic Error Handler (Catches any server crashes gracefully)
+app.use((err, req, res, next) => {
+  console.error('Server Error:', err);
+  res.status(500).json({ message: 'Internal Server Error', error: err.message });
 });
 
 // ── START SERVER ────────────────────────────────────────
