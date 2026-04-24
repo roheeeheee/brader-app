@@ -37,37 +37,33 @@ const corsOptions = {
   optionsSuccessStatus: 200 
 };
 
-// 1. Apply CORS globally
 app.use(cors(corsOptions));
 
-// 2. Body parsing
-app.use(express.json());
+// Handle Pre-flight requests using a REGEX to bypass Path-to-Regexp errors in Node 22
+app.options(/^(.*)$/, cors(corsOptions));
 
-// 3. Static files
+app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ── ROUTES ──────────────────────────────────────────────
 
-// Use a REGEX for options to avoid the PathError wildcard crash
-app.options(/^(.*)$/, cors(corsOptions));
-
+// Note: These MUST come before any broad middleware
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/admin', adminRoutes);
 
-// ── CATCH-ALL ───────────────────────────────────────────
+// ── ERROR HANDLING / CATCH-ALL ──────────────────────────
 
-// This is the safest way to catch unmatched routes without using '*'
-// We place it at the end of the stack.
-app.use((req, res) => {
+// This function only runs if no route above matched.
+// We check for /api prefix manually to avoid the '*' string crash.
+app.use((req, res, next) => {
   if (req.originalUrl.startsWith('/api')) {
     return res.status(404).json({ 
-      message: `API Route ${req.method} ${req.originalUrl} not found.` 
+      message: `API Endpoint ${req.method} ${req.originalUrl} not found.` 
     });
   }
-  // Optional: Handle non-API 404s or serve frontend
-  res.status(404).send('Not Found');
+  next();
 });
 
 // ── START SERVER ────────────────────────────────────────
